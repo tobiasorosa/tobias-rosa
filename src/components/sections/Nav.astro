@@ -1,0 +1,41 @@
+---
+import Button from '../ds/Button.astro';
+import { site } from '../../data/site';
+---
+
+<nav
+  class="sticky top-0 z-40 border-b border-subtle bg-[rgb(38_38_31/0.78)]
+         backdrop-blur-[14px] supports-[backdrop-filter]:bg-[rgb(38_38_31/0.78)]"
+  aria-label="Primary"
+>
+  <div
+    class="mx-auto flex h-18 max-w-content items-center justify-between gap-8 px-gutter"
+  >
+    <a href="#top" class="flex items-center gap-3 text-ink-strong hover:text-ink-strong">
+      <span class="text-h4 font-bold tracking-heading leading-none">
+        {site.name}<span class="text-accent">.</span>
+      </span>
+      <span class="font-mono text-micro tracking-label text-ink-faint">~/portfolio</span>
+    </a>
+
+    <div class="hidden items-center gap-8 wide:flex">
+      {
+        site.nav.map((item) => (
+          <a
+            href={item.href}
+            data-nav-link
+            class="relative py-2 text-body-sm uppercase tracking-label text-ink-muted no-underline
+                   transition-colors hover:text-ink-strong
+                   after:absolute after:bottom-0 after:left-0 after:right-full after:h-0.5
+                   after:bg-accent after:transition-[right] after:duration-[220ms] after:ease-out
+                   hover:after:right-0
+                   aria-[current=true]:text-accent aria-[current=true]:after:right-0"
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <Button href="#contact" variant="primary" size="sm">Get in touch</Button>
+    </div>
+  </div>
+</nav>

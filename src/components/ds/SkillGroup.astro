@@ -1,0 +1,14 @@
+---
+/** SkillGroup — ports `.ds-skillgroup`. */
+import Tag from './Tag.astro';
+
+type Props = { title: string; items: readonly string[] };
+const { title, items } = Astro.props;
+---
+
+<div class="flex flex-col gap-3">
+  <h3 class="font-mono text-micro tracking-eyebrow uppercase text-ink-faint font-normal">{title}</h3>
+  <ul class="flex flex-wrap gap-2 list-none p-0 m-0">
+    {items.map((item) => <li><Tag>{item}</Tag></li>)}
+  </ul>
+</div>

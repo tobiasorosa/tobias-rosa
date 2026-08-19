@@ -1,0 +1,23 @@
+---
+import SkillGroup from '../ds/SkillGroup.astro';
+import SectionHeading from '../ds/SectionHeading.astro';
+import { toolkit } from '../../data/toolkit';
+---
+
+<section id="toolkit" aria-labelledby="toolkit-title" class="mx-auto max-w-content px-gutter pt-24">
+  <SectionHeading
+    eyebrow="03 — Toolkit"
+    title="What I reach for"
+    id="toolkit-title"
+    data-reveal
+  />
+  <div class="mt-10 grid grid-cols-1 gap-8 wide:grid-cols-2 wide:gap-x-12">
+    {
+      toolkit.map((g, i) => (
+        <div data-reveal data-reveal-delay={i * 30}>
+          <SkillGroup title={g.title} items={g.items} />
+        </div>
+      ))
+    }
+  </div>
+</section>

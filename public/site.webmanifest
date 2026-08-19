@@ -1,0 +1,12 @@
+{
+  "name": "Tobias Rosa — Senior Full Stack Engineer",
+  "short_name": "Tobias Rosa",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#333329",
+  "theme_color": "#333329",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

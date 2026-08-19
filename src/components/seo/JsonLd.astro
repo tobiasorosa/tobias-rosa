@@ -1,0 +1,70 @@
+---
+/**
+ * Structured data, built from the same modules the page renders from
+ * (src/data/*), so it cannot drift from the visible copy.
+ */
+import { site } from '../../data/site';
+import { experience } from '../../data/experience';
+import { projects } from '../../data/projects';
+import { allSkills } from '../../data/toolkit';
+
+const origin = Astro.site!.href.replace(/\/$/, '');
+const personId = `${origin}/#person`;
+
+const person = {
+  '@type': 'Person',
+  '@id': personId,
+  name: site.name,
+  jobTitle: site.role,
+  description: site.description,
+  url: `${origin}/`,
+  email: `mailto:${site.email}`,
+  image: `${origin}/og.png`,
+  knowsLanguage: ['en', 'pt-BR'],
+  knowsAbout: allSkills,
+  address: { '@type': 'PostalAddress', addressCountry: site.countryCode },
+  worksFor: {
+    '@type': 'Organization',
+    name: site.employer.name,
+    address: { '@type': 'PostalAddress', addressLocality: site.employer.location },
+  },
+  // Past employers only — the current one is already `worksFor`.
+  alumniOf: [...new Set(experience.filter((r) => !r.current).map((r) => r.company))]
+    .filter((name) => name !== site.employer.name)
+    .map((name) => ({ '@type': 'Organization', name })),
+  sameAs: site.socials.map((s) => s.href),
+};
+
+const apps = projects.map((p) => ({
+  '@type': 'SoftwareApplication',
+  name: p.name,
+  url: p.url,
+  description: p.summary,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'iOS, Android, Web',
+  author: { '@id': personId },
+}));
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    person,
+    {
+      '@type': 'ProfilePage',
+      '@id': `${origin}/#page`,
+      url: `${origin}/`,
+      name: site.title,
+      inLanguage: site.lang,
+      mainEntity: { '@id': personId },
+      about: { '@id': personId },
+    },
+    ...apps,
+  ],
+};
+---
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(graph)}
+/>

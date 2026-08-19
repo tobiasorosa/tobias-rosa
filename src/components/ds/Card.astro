@@ -1,0 +1,36 @@
+---
+/**
+ * Card — ports `.ds-card`. Dark-on-dark, so depth is one surface
+ * lightness step plus a hairline and a 1px top highlight. No drop
+ * shadow at rest; only `interactive` lifts.
+ */
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+const card = cva('relative rounded-card border transition-[border-color,box-shadow,transform]', {
+  variants: {
+    variant: {
+      default: 'bg-card border-subtle shadow-hair',
+      flat: 'bg-transparent border-subtle shadow-none',
+      inset: 'bg-inset border-subtle shadow-hair',
+      accent: 'bg-accent-quiet border-brand-3 shadow-hair',
+    },
+    padding: { none: '', sm: 'p-4', md: 'p-6', lg: 'p-8' },
+    interactive: {
+      true: 'cursor-pointer hover:border-brand-3 hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0',
+      false: '',
+    },
+  },
+  defaultVariants: { variant: 'default', padding: 'md', interactive: false },
+});
+
+type Props = VariantProps<typeof card> &
+  Omit<HTMLAttributes<'div'>, 'class'> & { as?: string; class?: string };
+
+const { variant, padding, interactive, as: Tag = 'div', class: className, ...rest } = Astro.props;
+---
+
+<Tag class={cn(card({ variant, padding, interactive }), className)} {...rest}>
+  <slot />
+</Tag>

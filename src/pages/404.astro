@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/ds/Button.astro';
+import { site } from '../data/site';
+---
+
+<Base title={`Page not found — ${site.name}`} noindex>
+  <main
+    id="main"
+    class="mx-auto flex min-h-screen max-w-content flex-col justify-center px-gutter py-24"
+  >
+    <span
+      class="inline-flex items-center gap-3 font-mono text-micro tracking-eyebrow uppercase text-accent
+             before:content-[''] before:w-7 before:border-t-2 before:border-accent"
+    >
+      404
+    </span>
+    <h1 class="mt-4 text-display font-semibold leading-tight tracking-display text-ink-strong">
+      Nothing here<span class="text-accent">.</span>
+    </h1>
+    <p class="mt-5 max-w-prose text-lead text-ink-muted">
+      That address doesn't match anything on the site.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <Button href="/" variant="primary" size="lg">Back to the start</Button>
+      <Button href={`mailto:${site.email}`} variant="secondary" size="lg">Email me</Button>
+    </div>
+  </main>
+</Base>

@@ -1,0 +1,52 @@
+---
+/**
+ * Button — ports `.ds-btn` from the design system's components.css.
+ * Same prop contract as the DS bundle's Button.jsx: renders an <a>
+ * when `href` is set, a <button> otherwise.
+ */
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+const button = cva(
+  'inline-flex items-center justify-center gap-2 font-core font-semibold whitespace-nowrap ' +
+    'rounded-control border border-transparent cursor-pointer no-underline ' +
+    'transition-[color,background-color,border-color,box-shadow,transform] ' +
+    'focus-visible:outline-none focus-visible:shadow-[var(--ring-focus)] ' +
+    'aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-[0.42] ' +
+    'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-[0.42]',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-accent text-on-accent hover:bg-brand-2 active:bg-brand-3 active:translate-y-px',
+        secondary:
+          'bg-transparent text-accent border-brand-3 hover:bg-accent-quiet hover:border-brand-2 hover:text-brand-2 active:translate-y-px',
+        ghost: 'bg-transparent text-ink hover:bg-raised hover:text-ink-strong active:translate-y-px',
+        danger: 'bg-danger text-olive-950 hover:brightness-110 active:translate-y-px',
+      },
+      size: {
+        sm: 'h-[34px] px-3 text-body-sm',
+        md: 'h-11 px-6 text-body',
+        lg: 'h-[54px] px-8 text-lead',
+      },
+      block: { true: 'w-full', false: '' },
+    },
+    defaultVariants: { variant: 'primary', size: 'md', block: false },
+  },
+);
+
+type Props = VariantProps<typeof button> &
+  Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'class'> & {
+    href?: string;
+    type?: 'button' | 'submit' | 'reset';
+    class?: string;
+  };
+
+const { variant, size, block, href, type = 'button', class: className, ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
+const extra = href ? { href } : { type };
+---
+
+<Tag class={cn(button({ variant, size, block }), className)} {...extra} {...rest}>
+  <slot />
+</Tag>

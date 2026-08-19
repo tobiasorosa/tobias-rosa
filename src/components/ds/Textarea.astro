@@ -1,0 +1,20 @@
+---
+/** Textarea — ports `.ds-textarea`. */
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'textarea'>, 'class'> & { class?: string };
+const { class: className, ...rest } = Astro.props;
+---
+
+<textarea
+  class={cn(
+    'w-full px-4 py-3 font-core text-body text-ink bg-inset border border-line rounded-control',
+    'leading-body resize-y min-h-[110px] transition-[border-color,box-shadow]',
+    'placeholder:text-olive-300 hover:border-line-strong',
+    'focus:outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgb(255_255_0/0.14)]',
+    'aria-[invalid=true]:border-danger disabled:opacity-45 disabled:cursor-not-allowed',
+    className,
+  )}
+  {...rest}><slot /></textarea
+>

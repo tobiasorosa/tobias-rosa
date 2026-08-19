@@ -1,0 +1,116 @@
+---
+import { Image } from 'astro:assets';
+import Button from '../ds/Button.astro';
+import Badge from '../ds/Badge.astro';
+import Card from '../ds/Card.astro';
+import portrait from '../../assets/portrait.png';
+import { site } from '../../data/site';
+
+const facts = [
+  { term: 'ROLE', detail: 'Sr. Software Engineer' },
+  { term: 'AT', detail: `${site.employer.name} · ${site.employer.location}` },
+  { term: 'ALSO', detail: `Co-founder, ${site.sideProject.name}` },
+];
+---
+
+<header id="top" class="mx-auto max-w-content px-gutter pt-[clamp(56px,9vw,120px)] pb-[clamp(40px,6vw,72px)]">
+  <div class="grid grid-cols-1 gap-10 wide:grid-cols-[1.4fr_0.8fr] wide:gap-[clamp(32px,5vw,72px)] wide:items-start">
+    <div class="min-w-0">
+      <p data-anim="fade" class="mb-6 flex items-center gap-3">
+        <span class="font-mono text-micro font-semibold uppercase tracking-eyebrow text-ink-faint">
+          {site.role}
+        </span>
+        <span class="h-0.5 w-9 bg-brand-3" aria-hidden="true"></span>
+        <span class="font-mono text-micro font-semibold uppercase tracking-eyebrow text-ink-faint">
+          {site.location}
+        </span>
+      </p>
+
+      <h1 class="mb-7 text-display font-semibold leading-tight tracking-display text-ink-strong">
+        <span class="block overflow-hidden pb-0.5"
+          ><span data-anim="rise" data-anim-delay="50" class="block">I build SaaS</span></span
+        >
+        <span class="block overflow-hidden pb-0.5"
+          ><span data-anim="rise" data-anim-delay="130" class="block">platforms that</span></span
+        >
+        <span class="block overflow-hidden pb-0.5"
+          ><span data-anim="rise" data-anim-delay="210" class="block"
+            >hold up<span class="text-accent">.</span><span
+              data-caret
+              aria-hidden="true"
+              class="ml-[0.14em] inline-block h-[0.72em] w-[0.42em] bg-brand align-baseline"></span
+            ></span
+          ></span
+        >
+      </h1>
+
+      <p data-anim="fade" data-anim-delay="300" class="mb-5 max-w-prose text-lead leading-body text-ink">
+        Five years of C#, .NET, React and TypeScript — mostly backend services and the frontends that
+        live on top of them. Right now I do that for US product teams at {site.employer.name}, and on
+        the side I co-founded <a href={site.sideProject.url} target="_blank" rel="noopener"
+          >{site.sideProject.name}</a
+        >, a scheduling app shipping on both stores.
+      </p>
+      <p data-anim="fade" data-anim-delay="360" class="mb-8 max-w-prose text-ink-muted">
+        I like the unglamorous parts: clean architecture that survives the second year, queries that
+        stop being slow, production bugs that turn out to be three services deep.
+      </p>
+
+      <div data-anim="fade" data-anim-delay="420" class="flex flex-wrap gap-3">
+        <Button href="#work" variant="primary" size="lg">See the work</Button>
+        <Button href={site.resume} download variant="secondary" size="lg">Download résumé</Button>
+      </div>
+    </div>
+
+    <aside data-anim="fade" data-anim-delay="200" class="min-w-0">
+      <Card padding="md">
+        <div class="flex items-center gap-4 border-b border-subtle pb-[18px]">
+          <Image
+            src={portrait}
+            alt={`${site.name}, ${site.role.toLowerCase()}`}
+            width={76}
+            height={76}
+            densities={[1, 2]}
+            class="size-[76px] flex-none rounded-full border border-brand-3 object-cover
+                   object-[50%_22%] shadow-glow saturate-90"
+          />
+          <div class="min-w-0">
+            <p class="text-h4 font-semibold leading-[1.1] tracking-heading text-ink-strong">
+              {site.name}
+            </p>
+            <p class="mt-1.5 font-mono text-micro tracking-label text-ink-faint">
+              {site.languages}
+            </p>
+          </div>
+        </div>
+
+        <dl class="pt-1.5">
+          {
+            facts.map((f) => (
+              <div class="flex justify-between gap-4 border-b border-subtle py-[11px] font-mono text-caption">
+                <dt class="tracking-label text-ink-faint">{f.term}</dt>
+                <dd class="m-0 text-right text-ink">{f.detail}</dd>
+              </div>
+            ))
+          }
+          <div class="flex items-center justify-between gap-4 py-[11px] font-mono text-caption">
+            <dt class="tracking-label text-ink-faint">STATUS</dt>
+            <dd class="m-0"><Badge variant="success" dot>Open to work</Badge></dd>
+          </div>
+        </dl>
+      </Card>
+
+      <ul class="flex list-none gap-5 p-0 px-1 pt-4 font-mono text-caption">
+        {
+          site.socials.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener">
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </aside>
+  </div>
+</header>
