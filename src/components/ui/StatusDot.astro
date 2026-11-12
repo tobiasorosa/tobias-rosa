@@ -1,0 +1,15 @@
+---
+/** StatusDot — the 6px pip. Orange and green appear nowhere larger. */
+import { cn } from '../../lib/cn';
+
+type Props = { variant?: 'orange' | 'green'; class?: string };
+const { variant = 'orange', class: className } = Astro.props;
+---
+
+<span
+  aria-hidden="true"
+  class={cn(
+    'inline-block size-1.5 flex-none rounded-full',
+    variant === 'green' ? 'bg-green' : 'bg-orange',
+    className,
+  )}></span>

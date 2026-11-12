@@ -1,66 +1,63 @@
 ---
-import Tag from '../ds/Tag.astro';
-import SectionHeading from '../ds/SectionHeading.astro';
+import MonoLabel from '../ui/MonoLabel.astro';
+import SectionHeader from '../ui/SectionHeader.astro';
+import StatusDot from '../ui/StatusDot.astro';
+import TagList from '../ui/TagList.astro';
+import { cn } from '../../lib/cn';
 import { experience } from '../../data/experience';
 
-const row = 'grid grid-cols-1 gap-1 wide:grid-cols-[150px_1fr_220px] wide:gap-6';
+// Dates / role / company / toggle. Below 901px the cells stack.
+const cols = 'wide:grid-cols-[140px_minmax(0,1fr)_220px_16px] wide:gap-6';
 ---
 
-<section id="experience" aria-labelledby="experience-title" class="mx-auto max-w-content px-gutter pt-24">
-  <SectionHeading
+<section id="experience" aria-labelledby="experience-title" class="mx-auto max-w-page px-gutter pt-24">
+  <SectionHeader
     eyebrow="02 — Experience"
     title="Where I've worked"
     sub="Open a row for what the job actually involved."
     id="experience-title"
-    data-reveal
   />
 
-  <div class="mt-10 border-t border-line">
+  <div class="border-t border-stroke">
     <div
-      class={`${row} border-b border-subtle pt-3.5 pb-3 font-mono text-micro font-semibold tracking-eyebrow text-ink-faint`}
       aria-hidden="true"
+      class={`label-mono hidden border-b border-stroke py-4 text-granite wide:grid ${cols}`}
     >
-      <span>DATES</span><span>ROLE</span><span>COMPANY</span>
+      <span>Dates</span><span>Role</span><span>Company</span><span></span>
     </div>
 
     {
       experience.map((r, i) => (
-        <details
-          data-role
-          data-reveal
-          data-reveal-delay={i * 30}
-          open={i === 0}
-          class="border-b border-subtle"
-        >
-          <summary class={`${row} cursor-pointer list-none items-baseline py-5`}>
-            <span class={`font-mono text-caption ${r.current ? 'text-accent' : 'text-ink-faint'}`}>
+        <details open={i === 0} class="group border-b border-stroke">
+          <summary class={`group/row grid cursor-pointer grid-cols-1 items-center gap-2 py-6 ${cols}`}>
+            <MonoLabel class={cn('flex items-center gap-2', r.current ? 'text-bone' : 'text-granite')}>
+              {r.current && <StatusDot />}
               <time datetime={r.start}>{r.period}</time>
+            </MonoLabel>
+            <span class="text-base font-medium text-bone transition-colors group-hover/row:text-chalk">
+              {r.title}
             </span>
-            <span class="text-h4 font-semibold tracking-heading text-ink-strong">{r.title}</span>
-            <span class="font-mono text-caption uppercase text-ink-muted">
-              {r.company}{r.place && ` · ${r.place}`}
-            </span>
+            <MonoLabel class="text-stone">
+              {r.company}
+              {r.place && ` · ${r.place}`}
+            </MonoLabel>
+            <MonoLabel
+              aria-hidden="true"
+              class="hidden text-right text-stone after:content-['+'] group-open:after:content-['−'] wide:block"
+            />
           </summary>
-          <div class="pb-6">
-            <ul class="m-0 grid max-w-[1000px] list-none grid-cols-1 gap-3 p-0 wide:grid-cols-2 wide:gap-x-8">
+          <div class="pb-8 wide:pl-[164px]">
+            <ul class="grid max-w-[920px] grid-cols-[repeat(auto-fit,minmax(min(320px,100%),1fr))] gap-x-10 gap-y-4">
               {r.bullets.map((b) => (
-                <li class="flex gap-2.5 text-ink-muted">
-                  <span class="text-brand-3" aria-hidden="true">
+                <li class="flex gap-3 text-stone">
+                  <span class="text-graphite" aria-hidden="true">
                     —
                   </span>
-                  {b}
+                  <span>{b}</span>
                 </li>
               ))}
             </ul>
-            {r.stack && (
-              <ul class="mt-[18px] flex list-none flex-wrap gap-2 p-0">
-                {r.stack.map((s) => (
-                  <li>
-                    <Tag>{s}</Tag>
-                  </li>
-                ))}
-              </ul>
-            )}
+            {r.stack && <TagList items={r.stack} class="mt-6" />}
           </div>
         </details>
       ))

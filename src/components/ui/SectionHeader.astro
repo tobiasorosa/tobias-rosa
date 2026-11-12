@@ -1,0 +1,16 @@
+---
+/**
+ * SectionHeader — the numbered eyebrow ("01 — Selected work") that
+ * threads the page, the heading, and an optional subline.
+ */
+import MonoLabel from './MonoLabel.astro';
+
+type Props = { eyebrow: string; title: string; sub?: string; id?: string };
+const { eyebrow, title, sub, id } = Astro.props;
+---
+
+<div class="mb-10 flex flex-col gap-4">
+  <MonoLabel class="text-stone">{eyebrow}</MonoLabel>
+  <h2 id={id} class="text-heading text-bone">{title}</h2>
+  {sub && <p class="text-granite">{sub}</p>}
+</div>

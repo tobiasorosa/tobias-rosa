@@ -1,29 +1,20 @@
 ---
 import Base from '../layouts/Base.astro';
-import Button from '../components/ds/Button.astro';
+import Button from '../components/ui/Button.astro';
+import GhostLink from '../components/ui/GhostLink.astro';
+import MonoLabel from '../components/ui/MonoLabel.astro';
+import StatusDot from '../components/ui/StatusDot.astro';
 import { site } from '../data/site';
 ---
 
 <Base title={`Page not found — ${site.name}`} noindex>
-  <main
-    id="main"
-    class="mx-auto flex min-h-screen max-w-content flex-col justify-center px-gutter py-24"
-  >
-    <span
-      class="inline-flex items-center gap-3 font-mono text-micro tracking-eyebrow uppercase text-accent
-             before:content-[''] before:w-7 before:border-t-2 before:border-accent"
-    >
-      404
-    </span>
-    <h1 class="mt-4 text-display font-semibold leading-tight tracking-display text-ink-strong">
-      Nothing here<span class="text-accent">.</span>
-    </h1>
-    <p class="mt-5 max-w-prose text-lead text-ink-muted">
-      That address doesn't match anything on the site.
-    </p>
-    <div class="mt-8 flex flex-wrap gap-3">
-      <Button href="/" variant="primary" size="lg">Back to the start</Button>
-      <Button href={`mailto:${site.email}`} variant="secondary" size="lg">Email me</Button>
+  <main id="main" class="mx-auto flex min-h-screen max-w-page flex-col justify-center px-gutter py-24">
+    <MonoLabel class="flex items-center gap-2 text-stone"><StatusDot />404</MonoLabel>
+    <h1 class="mt-8 text-display text-bone">Nothing here.</h1>
+    <p class="mt-8 max-w-[58ch] text-stone">That address doesn't match anything on the site.</p>
+    <div class="mt-10 flex flex-wrap gap-4">
+      <Button href="/" variant="dark">Back to the start</Button>
+      <GhostLink href={`mailto:${site.email}`}>Email me</GhostLink>
     </div>
   </main>
 </Base>

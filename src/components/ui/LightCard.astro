@@ -1,0 +1,19 @@
+---
+/**
+ * LightCard — the only bright surface in the design. `data-surface`
+ * drives the `on-light:` variant and the canvas-coloured focus ring.
+ */
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'div'>, 'class'> & { as?: HTMLTag; class?: string };
+const { as: Tag = 'div', class: className, ...rest } = Astro.props;
+---
+
+<Tag
+  data-surface="light"
+  class={cn('grain rounded-card bg-bone p-[clamp(24px,4vw,56px)] text-canvas', className)}
+  {...rest}
+>
+  <slot />
+</Tag>

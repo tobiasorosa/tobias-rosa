@@ -1,0 +1,17 @@
+---
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'textarea'>, 'class'> & { class?: string };
+const { class: className, ...rest } = Astro.props;
+---
+
+<textarea
+  class={cn(
+    'min-h-11 w-full resize-y rounded-control border border-granite bg-chalk px-3 py-2.5',
+    'font-sans text-base text-canvas placeholder:text-graphite',
+    'hover:border-canvas focus:border-canvas',
+    className,
+  )}
+  {...rest}><slot /></textarea
+>

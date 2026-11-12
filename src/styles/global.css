@@ -1,229 +1,109 @@
 @import "tailwindcss";
 
-/* ─────────────────────────────────────────────────────────────
-   Afacad — variable 400–700, latin subset, self-hosted.
-   Italic is not shipped: nothing in the design or the DS
-   specimens uses it.
-   ───────────────────────────────────────────────────────────── */
-@font-face {
-  font-family: "Afacad";
-  src: url("/fonts/afacad-latin.woff2") format("woff2-variations");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-/* Metric-matched fallback. The <h1> is the LCP element, so the swap
-   must not reflow: Afacad's average advance is 0.49423em against
-   Trebuchet MS's 0.53916em (91.67%), and its ascent/descent are
-   100%/33.33% of em — divided by the size-adjust to survive it. */
-@font-face {
-  font-family: "Afacad Fallback";
-  src: local("Trebuchet MS"), local("Verdana");
-  size-adjust: 91.67%;
-  ascent-override: 109.09%;
-  descent-override: 36.36%;
-  line-gap-override: 0%;
-}
+/* Inside a LightCard the page inverts: bone surface, canvas ink. Tags
+   and text links pick that up through this variant instead of a prop. */
+@custom-variant on-light (&:where([data-surface="light"] *));
 
 /* ─────────────────────────────────────────────────────────────
-   Design tokens — ported from
-   _ds/tobias-rosa-design-system-eb00cfa0.../tokens/*.css
-   Two layers, as the DS defines them: a raw ramp, then semantic
-   aliases. Names are chosen for utility ergonomics (bg-page,
-   text-accent, border-subtle) rather than mirroring the CSS var
-   names 1:1.
+   Design tokens — the "Console" design. This block is the only
+   source of colour, type, radius and motion values; the default
+   Tailwind scales are cleared so nothing else is reachable.
    ───────────────────────────────────────────────────────────── */
 @theme {
-  /* ── Brand primaries ─────────────────────────────── */
-  --color-brand: #ffff00; /* signal — one solid use per viewport */
-  --color-brand-2: #cccc29; /* hover */
-  --color-brand-3: #99993d; /* press, quiet borders */
-  --color-brand-4: #66663a;
-  --color-brand-5: #43432b; /* tint washes */
+  /* ── Colour ──────────────────────────────────────── */
+  --color-*: initial;
+  --color-canvas: #101010; /* page background, every section */
+  --color-lift: #1d1a18; /* nav border, panel header bar, hairlines */
+  --color-stroke: #3d3a39; /* borders, ghost outline, dividers */
+  --color-graphite: #4d4947; /* muted text on light cards, bullet dashes */
+  --color-granite: #8a8380; /* muted body text, inactive labels */
+  --color-stone: #b8b3b0; /* secondary text, eyebrows, nav links */
+  --color-bone: #eeeeee; /* primary text, light card surface */
+  --color-chalk: #fafafa; /* light button fill, hover and active text */
+  --color-orange: #ee6018; /* status dots and the headline cursor only */
+  --color-green: #a0ca92; /* "Open to work" status only */
 
-  /* ── Olive neutral ramp (from #333329) ───────────── */
-  --color-olive-950: #16160f;
-  --color-olive-900: #1c1c17;
-  --color-olive-800: #26261f;
-  --color-olive-700: #333329;
-  --color-olive-600: #3e3e33;
-  --color-olive-500: #4c4c3e;
-  --color-olive-400: #5e5e4d;
-  --color-olive-300: #7a7a66;
-  --color-olive-200: #9c9c88;
-  /* Derived step. The DS's olive-200 faint ink measures 3.88:1 on the
-     card surface — under AA for small text. #a9a997 is the lowest point
-     on the 200→100 ramp that clears 4.5:1 on every surface here. */
-  --color-olive-150: #a9a997;
-  --color-olive-100: #c3c3b4;
-  --color-olive-50: #e3e3db;
+  /* ── Type. The families are registered in astro.config.mjs
+        and exposed as variables by <Font> in Base.astro. ─ */
+  --font-sans: var(--font-geist);
+  --font-mono: var(--font-geist-mono);
 
-  /* ── Surfaces ────────────────────────────────────── */
-  --color-page: var(--color-olive-700);
-  --color-sunken: var(--color-olive-800);
-  --color-deep: var(--color-olive-900);
-  --color-card: var(--color-olive-600);
-  --color-raised: var(--color-olive-500);
-  --color-inset: var(--color-olive-800);
-  --color-accent-quiet: var(--color-brand-5);
-
-  /* ── Ink (text). Named `ink` so the `text-*` utility
-        namespace stays free for font sizes. ─────────── */
-  --color-ink: #f6f6f0; /* body — never pure white */
-  --color-ink-strong: #ffffff;
-  --color-ink-muted: var(--color-olive-100);
-  --color-ink-faint: var(--color-olive-150);
-  --color-accent: var(--color-brand);
-  --color-on-accent: var(--color-olive-950);
-
-  /* ── Lines ───────────────────────────────────────── */
-  --color-subtle: var(--color-olive-500);
-  --color-line: var(--color-olive-400);
-  --color-line-strong: var(--color-olive-300);
-
-  /* ── Status (desaturated so nothing fights the yellow) */
-  --color-success: #9cc14f;
-  --color-warning: #e8b23c;
-  --color-danger: #e2664f;
-  --color-info: #7faec2;
-
-  /* ── Type ────────────────────────────────────────── */
-  --font-core: "Afacad", "Afacad Fallback", "Trebuchet MS", Verdana, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    "Liberation Mono", monospace;
-
-  --font-weight-regular: 400;
+  /* 400 everywhere; 500 only for the profile name and role titles. */
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
   --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
 
-  /* Afacad has a tall x-height and narrow set width, so every
-     size runs a step larger than you'd size a grotesque. */
-  --text-display-xl: clamp(56px, 9vw, 124px);
-  --text-display-xl--line-height: 0.94;
-  --text-display: clamp(44px, 6vw, 80px);
-  --text-display--line-height: 0.94;
-  --text-h1: 56px;
-  --text-h1--line-height: 1.12;
-  --text-h2: 40px;
-  --text-h2--line-height: 1.12;
-  --text-h3: 30px;
-  --text-h3--line-height: 1.16;
-  --text-h4: 24px;
-  --text-h4--line-height: 1.16;
-  --text-lead: 22px;
-  --text-lead--line-height: 1.55;
-  --text-body: 18px;
-  --text-body--line-height: 1.55;
-  --text-body-sm: 16px;
-  --text-body-sm--line-height: 1.55;
-  --text-caption: 14px;
-  --text-caption--line-height: 1.4;
-  --text-micro: 12px;
-  --text-micro--line-height: 1.4;
-
-  --leading-tight: 0.94;
-  --leading-snug: 1.12;
-  --leading-heading: 1.16;
-  --leading-body: 1.55;
-  --leading-loose: 1.7;
-
-  --tracking-display: -0.02em;
-  --tracking-heading: -0.01em;
-  --tracking-label: 0.06em;
-  --tracking-eyebrow: 0.18em;
+  /* Line height never goes above 1.5. */
+  --text-*: initial;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.43;
+  --text-base: 16px;
+  --text-base--line-height: 1.5;
+  --text-metric: 36px;
+  --text-metric--line-height: 1.1;
+  --text-metric--letter-spacing: -1.12px;
+  --text-heading: clamp(36px, 4.4vw, 44px);
+  --text-heading--line-height: 1.12;
+  --text-heading--letter-spacing: -0.025em;
+  --text-display: clamp(44px, 6.4vw, 72px);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.04em;
 
   /* ── Space & measure ─────────────────────────────── */
-  /* The design collapses its two-column grids at 900px, which is
-     between Tailwind's md and lg. Keep the design's own breakpoint. */
-  --breakpoint-wide: 900px;
+  /* The design collapses its grids at 900px and below. */
+  --breakpoint-wide: 901px;
 
-  --spacing: 4px; /* 4px base — p-6 = 24px, p-24 = 96px, … */
-  --spacing-gutter: clamp(20px, 5vw, 72px); /* px-gutter */
-  --spacing-section: clamp(56px, 9vw, 96px); /* py-section */
-  --container-content: 1180px;
-  --container-wide: 1440px;
-  --container-prose: 68ch;
+  --spacing: 4px; /* p-6 = 24px card gap, pt-24 = 96px between sections */
+  --spacing-gutter: clamp(20px, 4vw, 40px); /* px-gutter */
+  /* 1200px of content plus the 40px gutter on each side. */
+  --container-page: 1280px; /* max-w-page */
 
-  /* ── Radii — squarish ────────────────────────────── */
-  --radius-chip: 2px;
-  --radius-control: 4px; /* buttons, inputs, tags */
-  --radius-card: 8px;
-  --radius-panel: 14px; /* overlays, large media */
+  /* ── Radii ───────────────────────────────────────── */
+  --radius-*: initial;
+  --radius-control: 3px; /* buttons, tags, inputs, the portrait */
+  --radius-panel: 10px; /* cards and panels */
+  --radius-card: 20px; /* the two light cards */
 
-  /* ── Elevation. Dark-on-dark: depth is surface lightness
-        plus a hairline, not soft shadows. ───────────── */
-  --shadow-hair: inset 0 1px 0 rgb(255 255 255 / 0.04);
-  --shadow-lift: 0 1px 0 rgb(255 255 255 / 0.05), 0 8px 24px rgb(11 11 7 / 0.45);
-  --shadow-overlay: 0 24px 64px rgb(11 11 7 / 0.62);
-  --shadow-glow: 0 0 0 1px var(--color-brand-3), 0 0 24px rgb(255 255 0 / 0.14);
+  /* ── No shadows, glows or blur anywhere. ─────────── */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --blur-*: initial;
 
   /* ── Motion ──────────────────────────────────────── */
-  --ease-out: cubic-bezier(0.2, 0.8, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.6, 0, 0.3, 1);
-  --ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
-  --default-transition-duration: 140ms;
-  --default-transition-timing-function: var(--ease-out);
+  --ease-*: initial;
+  --ease-ui: cubic-bezier(0.4, 0, 0.2, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: var(--ease-ui);
 
-  --animate-rise: tr-rise 0.62s var(--ease-entrance) both;
-  --animate-fade-up: tr-fade 0.5s var(--ease-entrance) both;
-  --animate-blink: tr-blink 1.1s steps(1, end) 1s infinite;
+  --animate-*: initial;
+  /* The one entrance, on the hero. Delay comes from --enter-delay. */
+  --animate-enter: enter 0.2s var(--ease-ui) var(--enter-delay, 0ms) both;
+  --animate-blink: blink 1.1s steps(1, end) infinite;
 
-  @keyframes tr-rise {
-    from {
-      transform: translateY(106%);
-    }
-    to {
-      transform: translateY(0);
-    }
-  }
-  @keyframes tr-fade {
+  @keyframes enter {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(8px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
-  @keyframes tr-blink {
+  @keyframes blink {
     0%,
-    45% {
+    49% {
       opacity: 1;
     }
     50%,
-    95% {
-      opacity: 0;
-    }
     100% {
-      opacity: 1;
+      opacity: 0;
     }
   }
 }
 
-/* Non-utility tokens: referenced through arbitrary values. */
-:root {
-  --dur-instant: 80ms;
-  --dur-fast: 140ms;
-  --dur-base: 220ms;
-  --dur-slow: 420ms;
-  --ring-focus: 0 0 0 2px var(--color-olive-900), 0 0 0 4px var(--color-brand);
-  --overlay-scrim: rgb(22 22 15 / 0.72);
-  --transition-ui: color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    border-color var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Base — only the DS-specific rules Preflight doesn't cover.
-   ───────────────────────────────────────────────────────────── */
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -231,77 +111,31 @@
   }
 
   body {
-    background: var(--color-page);
-    color: var(--color-ink);
-    font-family: var(--font-core);
-    font-size: var(--text-body);
-    line-height: var(--leading-body);
+    background: var(--color-canvas);
+    color: var(--color-bone);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    font-weight: 400;
+    line-height: var(--text-base--line-height);
     -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-heading);
-    letter-spacing: var(--tracking-heading);
-    color: var(--color-ink-strong);
-  }
-
-  p {
-    text-wrap: pretty;
-  }
-
-  a {
-    color: var(--color-brand);
-    text-decoration: none;
-    text-underline-offset: 3px;
-    transition: var(--transition-ui);
-  }
-  a:hover {
-    color: var(--color-brand-2);
-  }
-
-  /* A link inside a text block cannot be signalled by colour alone:
-     yellow against #f6f6f0 body copy is 1.01:1. Standalone links (nav,
-     buttons, link lists) are unaffected. */
-  p a {
-    text-decoration: underline;
-    text-decoration-color: var(--color-brand-3);
-  }
-  p a:hover {
-    text-decoration-color: currentColor;
-  }
-
-  code,
-  kbd,
-  pre,
-  samp {
-    font-family: var(--font-mono);
-    font-size: 0.9em;
-  }
-
-  ::selection {
-    background: var(--color-brand);
-    color: var(--color-olive-950);
+  /* Every hover and state change: the same three properties, 0.15s. */
+  a,
+  button,
+  input,
+  textarea {
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-ui);
   }
 
   :focus-visible {
-    outline: none;
-    box-shadow: var(--ring-focus);
+    outline: 2px solid var(--color-chalk);
+    outline-offset: 2px;
   }
-
-  /* DS rule: Lucide at stroke width 1.75. Iconify ships the paths at 2,
-     and a CSS property beats an SVG presentation attribute. */
-  [data-icon] path,
-  [data-icon] circle,
-  [data-icon] line,
-  [data-icon] polyline {
-    stroke-width: 1.75;
+  [data-surface="light"] :focus-visible {
+    outline-color: var(--color-canvas);
   }
 
   /* Native marker off — the experience rows draw their own. */
@@ -312,7 +146,6 @@
     list-style: none;
   }
 
-  /* The DS bans looping ambient motion; honour the OS switch too. */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
@@ -323,5 +156,24 @@
       animation: none !important;
       transition: none !important;
     }
+  }
+}
+
+/* In the components layer so single-property utilities (normal-case,
+   leading-normal, a colour) always win over it. */
+@layer components {
+  /* The 12px uppercase mono label. */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Faint film grain for the light cards. */
+  .grain {
+    background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }

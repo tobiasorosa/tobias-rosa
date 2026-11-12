@@ -1,21 +1,18 @@
 ---
-import SkillGroup from '../ds/SkillGroup.astro';
-import SectionHeading from '../ds/SectionHeading.astro';
+import SectionHeader from '../ui/SectionHeader.astro';
+import TagList from '../ui/TagList.astro';
 import { toolkit } from '../../data/toolkit';
 ---
 
-<section id="toolkit" aria-labelledby="toolkit-title" class="mx-auto max-w-content px-gutter pt-24">
-  <SectionHeading
-    eyebrow="03 — Toolkit"
-    title="What I reach for"
-    id="toolkit-title"
-    data-reveal
-  />
-  <div class="mt-10 grid grid-cols-1 gap-8 wide:grid-cols-2 wide:gap-x-12">
+<section id="toolkit" aria-labelledby="toolkit-title" class="mx-auto max-w-page px-gutter pt-24">
+  <SectionHeader eyebrow="03 — Toolkit" title="What I reach for" id="toolkit-title" />
+
+  <div class="grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] gap-6">
     {
-      toolkit.map((g, i) => (
-        <div data-reveal data-reveal-delay={i * 30}>
-          <SkillGroup title={g.title} items={g.items} />
+      toolkit.map((g) => (
+        <div class="flex flex-col gap-6 rounded-panel border border-stroke p-5">
+          <h3 class="label-mono text-bone">{g.title}</h3>
+          <TagList items={g.items} />
         </div>
       ))
     }

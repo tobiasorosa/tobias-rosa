@@ -1,5 +1,5 @@
 ---
-/** Tag — ports `.ds-tag`. Mono type; carries technology names. */
+/** Tag — carries a technology name. */
 import { cn } from '../../lib/cn';
 import type { HTMLAttributes } from 'astro/types';
 
@@ -9,8 +9,8 @@ const { class: className, ...rest } = Astro.props;
 
 <span
   class={cn(
-    'inline-flex items-center gap-2 h-7 px-3 rounded-control bg-inset border border-subtle',
-    'text-ink-muted font-mono text-micro tracking-[0.02em]',
+    'label-mono inline-flex h-7 items-center rounded-control border border-stroke px-2 text-stone',
+    'on-light:border-stone on-light:text-canvas',
     className,
   )}
   {...rest}
