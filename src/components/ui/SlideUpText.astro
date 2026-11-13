@@ -1,0 +1,184 @@
+---
+/**
+ * SlideUpText — each word, character or line rises out of its own
+ * overflow-hidden mask. Same props as spell-ui's `slide-up-text`, but
+ * rendered as static HTML and driven by one CSS keyframe, so the hero
+ * headline ships no React and no animation library.
+ *
+ * Where it differs from the original:
+ * - `onStart` / `onComplete` are DOM events on the root element,
+ *   `slideup:start` and `slideup:complete` (both bubble).
+ * - `transition` is tween only: a duration and a cubic-bezier.
+ * - With `autoStart={false}`, start it by dispatching `slideup:run`
+ *   on the root element.
+ *
+ * The text rests in its final position. Without JavaScript the default
+ * path still animates (it is pure CSS); with reduced motion nothing moves.
+ */
+type Props = {
+  split?: 'words' | 'characters' | 'lines';
+  /** Seconds before the first piece moves. */
+  delay?: number;
+  /** Seconds between pieces. */
+  stagger?: number;
+  from?: 'first' | 'last' | 'center';
+  transition?: { duration?: number; ease?: [number, number, number, number] | string };
+  autoStart?: boolean;
+  /** Wait until the text scrolls into view. */
+  inView?: boolean;
+  class?: string;
+  className?: string;
+  wordClass?: string;
+  charClass?: string;
+};
+
+const {
+  split = 'words',
+  delay = 0,
+  stagger = 0.1,
+  from = 'first',
+  transition = {},
+  autoStart = true,
+  inView = false,
+  class: classAttr,
+  className = classAttr,
+  wordClass,
+  charClass,
+} = Astro.props;
+
+const { duration = 0.5, ease = [0.625, 0.05, 0, 1] } = transition;
+const easing = typeof ease === 'string' ? ease : `cubic-bezier(${ease.join(',')})`;
+
+// The slot arrives as escaped HTML, so an entity counts as one character.
+const text = (await Astro.slots.render('default')).trim().replace(/\s+/g, ' ');
+const words = text.split(' ');
+const chars = words.map((w) => w.match(/&#?\w+;|./gsu) ?? []);
+
+const total = split === 'characters' ? chars.flat().length : words.length;
+const order = (k: number) =>
+  from === 'last' ? total - 1 - k : from === 'center' ? Math.round(Math.abs(k - (total - 1) / 2)) : k;
+
+// Lines are only known once the browser has wrapped the text, so the
+// script assigns their indices; every other case can start from CSS alone.
+const start = !autoStart ? 'manual' : inView ? 'view' : split === 'lines' ? 'auto' : 'css';
+let k = 0;
+---
+
+<span
+  data-slide-up={start}
+  data-split={split}
+  data-from={from}
+  data-run={start === 'css' ? '' : undefined}
+  class={className}
+  style={`--su-delay:${delay}s;--su-stagger:${stagger}s;--su-dur:${duration}s;--su-ease:${easing}`}
+>
+  {
+    split === 'characters' ? (
+      <>
+        <span class="sr-only" set:html={text} />
+        {words.map((_, w) => (
+          <>
+            <span aria-hidden="true" class:list={['word', wordClass]}>
+              {chars[w].map((c) => (
+                <span class="piece">
+                  <span data-piece class={charClass} style={`--i:${order(k++)}`} set:html={c} />
+                </span>
+              ))}
+            </span>{w < words.length - 1 && ' '}
+          </>
+        ))}
+      </>
+    ) : (
+      words.map((word, w) => (
+        <>
+          <span class="piece">
+            <span data-piece class={wordClass} style={`--i:${order(k++)}`} set:html={word} />
+          </span>{w < words.length - 1 && ' '}
+        </>
+      ))
+    )
+  }
+</span>
+
+<style>
+  .word {
+    display: inline-block;
+    white-space: nowrap;
+  }
+  /* The mask. Padding makes room for descenders and the tight tracking;
+     the negative margin gives it back so the line box is unchanged. */
+  .piece {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    padding: 0 0.05em 0.14em 0;
+    margin: 0 -0.05em -0.14em 0;
+  }
+  .piece > span {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    [data-run] .piece > span {
+      animation: slide-up var(--su-dur) var(--su-ease)
+        calc(var(--su-delay) + var(--i) * var(--su-stagger)) both;
+    }
+  }
+  @keyframes slide-up {
+    from {
+      transform: translateY(110%);
+    }
+  }
+</style>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('[data-slide-up]').forEach((root) => {
+    const pieces = [...root.querySelectorAll<HTMLElement>('[data-piece]')];
+    if (!pieces.length) return;
+
+    let started = false;
+    let ended = 0;
+    const emit = (name: string) => root.dispatchEvent(new CustomEvent(name, { bubbles: true }));
+    root.addEventListener('animationstart', () => {
+      if (started) return;
+      started = true;
+      emit('slideup:start');
+    });
+    root.addEventListener('animationend', () => {
+      if (++ended === pieces.length) emit('slideup:complete');
+    });
+
+    const run = () => {
+      started = false;
+      ended = 0;
+      if (root.dataset.split === 'lines') {
+        // Words that share a top edge share a line, and so a delay.
+        const tops = [...new Set(pieces.map((p) => p.offsetTop))].sort((a, b) => a - b);
+        const last = tops.length - 1;
+        for (const p of pieces) {
+          const line = tops.indexOf(p.offsetTop);
+          const from = root.dataset.from;
+          const i =
+            from === 'last' ? last - line : from === 'center' ? Math.round(Math.abs(line - last / 2)) : line;
+          p.style.setProperty('--i', String(i));
+        }
+      }
+      root.setAttribute('data-run', '');
+    };
+
+    root.addEventListener('slideup:run', run);
+    if (reduce) return;
+
+    const start = root.dataset.slideUp;
+    if (start === 'auto') run();
+    if (start === 'view' && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        run();
+      });
+      io.observe(root);
+    }
+  });
+</script>

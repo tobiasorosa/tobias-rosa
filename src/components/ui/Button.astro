@@ -1,0 +1,42 @@
+---
+/**
+ * Button — neutral fills only. Renders an <a> when `href` is set,
+ * a <button> otherwise.
+ */
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+const button = cva(
+  'inline-flex cursor-pointer items-center justify-center gap-2 rounded-control px-3.5 ' +
+    'font-sans text-sm leading-none whitespace-nowrap',
+  {
+    variants: {
+      variant: {
+        // #1f1d1c sits between canvas and lift; this button is its only use.
+        dark: 'bg-[#1f1d1c] text-bone hover:bg-stroke hover:text-chalk',
+        light: 'bg-chalk text-canvas hover:bg-bone',
+        // For light cards.
+        ink: 'bg-canvas text-bone hover:bg-lift hover:text-chalk',
+      },
+      size: { md: 'h-11', sm: 'h-9' },
+    },
+    defaultVariants: { variant: 'dark', size: 'md' },
+  },
+);
+
+type Props = VariantProps<typeof button> &
+  Omit<HTMLAttributes<'a'> & HTMLAttributes<'button'>, 'class'> & {
+    href?: string;
+    type?: 'button' | 'submit' | 'reset';
+    class?: string;
+  };
+
+const { variant, size, href, type = 'button', class: className, ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
+const extra = href ? { href } : { type };
+---
+
+<Tag class={cn(button({ variant, size }), className)} {...extra} {...rest}>
+  <slot />
+</Tag>

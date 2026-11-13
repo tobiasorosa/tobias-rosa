@@ -1,0 +1,17 @@
+---
+/** TextLink — inline link marked by a 1px bottom border, not colour. */
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'a'>, 'class'> & { class?: string };
+const { class: className, ...rest } = Astro.props;
+---
+
+<a
+  class={cn(
+    'border-b border-stroke hover:border-chalk hover:text-chalk',
+    'on-light:border-granite on-light:hover:border-canvas on-light:hover:text-canvas',
+    className,
+  )}
+  {...rest}><slot /></a
+>

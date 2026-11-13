@@ -1,0 +1,21 @@
+---
+/** GhostLink — outlined, square-cornered link. `ink` is for light cards. */
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'a'>, 'class'> & { variant?: 'default' | 'ink'; class?: string };
+const { variant = 'default', class: className, ...rest } = Astro.props;
+---
+
+<a
+  class={cn(
+    'inline-flex h-[46px] items-center gap-2 border px-3.5 text-sm leading-none whitespace-nowrap',
+    variant === 'ink'
+      ? 'border-graphite text-canvas hover:border-canvas'
+      : 'border-stroke text-bone hover:border-chalk hover:text-chalk',
+    className,
+  )}
+  {...rest}
+>
+  <slot />
+</a>

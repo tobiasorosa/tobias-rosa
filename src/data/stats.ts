@@ -1,8 +1,8 @@
 export type Stat = { value: number; suffix?: string; label: string };
 
 /**
- * DS voice rule: "Numbers only if true. Three real numbers beat four
- * with one invented." Verify each of these before launch.
+ * The four metric tiles in the hero profile panel. Numbers only if
+ * true — verify each of these before launch.
  */
 export const stats: Stat[] = [
   { value: 5, suffix: '+', label: 'Years shipping' },

@@ -13,6 +13,7 @@ export const site = {
   lang: "en",
   location: "Brazil · remote",
   countryCode: "BR",
+  pronouns: "He/him",
   languages: "EN · PT-BR",
   email: "tobias.rosa2000@gmail.com",
   whatsapp: { label: "+55 12 99222-1131", href: "https://wa.me/5512992221131" },

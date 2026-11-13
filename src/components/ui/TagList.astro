@@ -1,0 +1,12 @@
+---
+/** TagList — a wrapping row of tags from a string array. */
+import Tag from './Tag.astro';
+import { cn } from '../../lib/cn';
+
+type Props = { items: readonly string[]; class?: string };
+const { items, class: className } = Astro.props;
+---
+
+<ul class={cn('flex flex-wrap gap-2', className)}>
+  {items.map((item) => <li class="flex"><Tag>{item}</Tag></li>)}
+</ul>

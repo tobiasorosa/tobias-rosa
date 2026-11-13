@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { Font } from 'astro:assets';
 import Seo from '../components/seo/Seo.astro';
 import JsonLd from '../components/seo/JsonLd.astro';
 import { site } from '../data/site';
@@ -9,22 +10,17 @@ const { title, description, noindex } = Astro.props;
 ---
 
 <!doctype html>
-<html lang={site.lang} class="bg-page">
+<html lang={site.lang} class="bg-canvas">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#333329" />
+    <meta name="theme-color" content="#101010" />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- LCP is the hero <h1>, so the display face is preloaded ahead of
-         everything else. 20.7 KB, latin subset, variable 400–700. -->
-    <link
-      rel="preload"
-      href="/fonts/afacad-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <!-- LCP is the hero <h1>, so both faces are preloaded ahead of
+         everything else. Self-hosted, latin subset. -->
+    <Font cssVariable="--font-geist" preload />
+    <Font cssVariable="--font-geist-mono" preload />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -34,12 +30,12 @@ const { title, description, noindex } = Astro.props;
     <Seo {title} {description} {noindex} />
     <JsonLd />
   </head>
-  <body class="bg-page text-ink font-core text-body leading-body antialiased">
+  <body>
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50
-             focus:rounded-control focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent
-             focus:font-semibold"
+             focus:rounded-control focus:bg-chalk focus:px-3.5 focus:py-2 focus:text-sm
+             focus:text-canvas"
     >
       Skip to content
     </a>

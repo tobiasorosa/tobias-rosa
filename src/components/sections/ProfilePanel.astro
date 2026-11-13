@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import MonoLabel from '../ui/MonoLabel.astro';
+import StatusDot from '../ui/StatusDot.astro';
+import TextLink from '../ui/TextLink.astro';
+import portrait from '../../assets/portrait.png';
+import { site } from '../../data/site';
+import { stats } from '../../data/stats';
+
+const facts = [
+  { term: 'Role', detail: 'Sr. Software Engineer' },
+  { term: 'At', detail: `${site.employer.name} · ${site.employer.location}` },
+  { term: 'Also', detail: `Co-founder, ${site.sideProject.name}` },
+];
+---
+
+<aside class="min-w-0 animate-enter" style="--enter-delay:80ms">
+  <div class="overflow-hidden rounded-panel border border-stroke">
+    <div class="flex h-[41px] items-center justify-between gap-4 border-b border-stroke bg-lift px-5">
+      <MonoLabel class="flex items-center gap-2 text-bone"><StatusDot />Profile</MonoLabel>
+      <MonoLabel class="text-stone">{site.pronouns} · {site.languages}</MonoLabel>
+    </div>
+
+    <div class="flex items-center gap-4 border-b border-stroke p-5">
+      <Image
+        src={portrait}
+        alt={`${site.name}, ${site.role.toLowerCase()}`}
+        width={64}
+        height={64}
+        densities={[1, 2, 3]}
+        quality={90}
+        loading="eager"
+        class="size-16 flex-none rounded-control object-cover grayscale"
+      />
+      <div class="flex min-w-0 flex-col gap-2">
+        <p class="text-base leading-none font-medium text-bone">{site.name}</p>
+        <MonoLabel as="p" class="text-granite">{site.role}</MonoLabel>
+      </div>
+    </div>
+
+    <!-- 1px gaps over a stroke background draw the dividers. -->
+    <dl class="grid grid-cols-2 gap-px border-b border-stroke bg-stroke">
+      {
+        stats.map((s) => (
+          <div class="flex flex-col gap-4 bg-canvas p-5">
+            <dt class="label-mono text-stone">{s.label}</dt>
+            <dd class="text-metric text-bone">
+              {s.value}
+              {s.suffix}
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <dl class="px-5">
+      {
+        facts.map((f) => (
+          <div class="flex items-center justify-between gap-4 border-b border-lift py-4">
+            <dt class="label-mono text-granite">{f.term}</dt>
+            <dd class="text-right text-sm text-bone">{f.detail}</dd>
+          </div>
+        ))
+      }
+      <div class="flex items-center justify-between gap-4 py-4">
+        <dt class="label-mono text-granite">Status</dt>
+        <dd class="label-mono flex items-center gap-2 text-green">
+          <StatusDot variant="green" />Open to work
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <ul class="label-mono flex flex-wrap gap-6 px-5 pt-5 text-stone">
+    {
+      site.socials.map((s) => (
+        <li class="flex">
+          <TextLink href={s.href} target="_blank" rel="noopener" class="pb-1.5">
+            {s.label}
+          </TextLink>
+        </li>
+      ))
+    }
+  </ul>
+</aside>

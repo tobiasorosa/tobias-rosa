@@ -1,0 +1,10 @@
+---
+/** MonoLabel — the 12px uppercase mono style, on any element. */
+import { cn } from '../../lib/cn';
+import type { HTMLAttributes, HTMLTag } from 'astro/types';
+
+type Props = Omit<HTMLAttributes<'span'>, 'class'> & { as?: HTMLTag; class?: string };
+const { as: Tag = 'span', class: className, ...rest } = Astro.props;
+---
+
+<Tag class={cn('label-mono', className)} {...rest}><slot /></Tag>

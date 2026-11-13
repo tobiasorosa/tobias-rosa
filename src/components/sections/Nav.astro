@@ -1,21 +1,14 @@
 ---
-import Button from '../ds/Button.astro';
+import Button from '../ui/Button.astro';
+import MonoLabel from '../ui/MonoLabel.astro';
 import { site } from '../../data/site';
 ---
 
-<nav
-  class="sticky top-0 z-40 border-b border-subtle bg-[rgb(38_38_31/0.78)]
-         backdrop-blur-[14px] supports-[backdrop-filter]:bg-[rgb(38_38_31/0.78)]"
-  aria-label="Primary"
->
-  <div
-    class="mx-auto flex h-18 max-w-content items-center justify-between gap-8 px-gutter"
-  >
-    <a href="#top" class="flex items-center gap-3 text-ink-strong hover:text-ink-strong">
-      <span class="text-h4 font-bold tracking-heading leading-none">
-        {site.name}<span class="text-accent">.</span>
-      </span>
-      <span class="font-mono text-micro tracking-label text-ink-faint">~/portfolio</span>
+<nav class="sticky top-0 z-40 border-b border-lift bg-canvas" aria-label="Primary">
+  <div class="mx-auto flex h-16 max-w-page items-center justify-between gap-8 px-gutter">
+    <a href="#top" class="flex items-center gap-3">
+      <MonoLabel class="text-bone">{site.name}</MonoLabel>
+      <MonoLabel class="text-granite normal-case">~/portfolio</MonoLabel>
     </a>
 
     <div class="hidden items-center gap-8 wide:flex">
@@ -24,18 +17,13 @@ import { site } from '../../data/site';
           <a
             href={item.href}
             data-nav-link
-            class="relative py-2 text-body-sm uppercase tracking-label text-ink-muted no-underline
-                   transition-colors hover:text-ink-strong
-                   after:absolute after:bottom-0 after:left-0 after:right-full after:h-0.5
-                   after:bg-accent after:transition-[right] after:duration-[220ms] after:ease-out
-                   hover:after:right-0
-                   aria-[current=true]:text-accent aria-[current=true]:after:right-0"
+            class="text-sm leading-none text-stone uppercase hover:text-chalk aria-[current=true]:text-chalk"
           >
             {item.label}
           </a>
         ))
       }
-      <Button href="#contact" variant="primary" size="sm">Get in touch</Button>
+      <Button href="#contact" variant="light" size="sm">Get in touch</Button>
     </div>
   </div>
 </nav>
