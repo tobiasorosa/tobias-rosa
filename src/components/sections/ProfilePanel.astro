@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import MonoLabel from '../ui/MonoLabel.astro';
 import StatusDot from '../ui/StatusDot.astro';
 import TextLink from '../ui/TextLink.astro';
-import portrait from '../../assets/portrait.jpg';
+import portrait from '../../assets/portrait.png';
 import { site } from '../../data/site';
 import { stats } from '../../data/stats';
 
@@ -27,8 +27,10 @@ const facts = [
         alt={`${site.name}, ${site.role.toLowerCase()}`}
         width={64}
         height={64}
-        densities={[1, 2]}
-        class="size-16 flex-none rounded-control object-cover object-[50%_22%] grayscale"
+        densities={[1, 2, 3]}
+        quality={90}
+        loading="eager"
+        class="size-16 flex-none rounded-control object-cover grayscale"
       />
       <div class="flex min-w-0 flex-col gap-2">
         <p class="text-base leading-none font-medium text-bone">{site.name}</p>
