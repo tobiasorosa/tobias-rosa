@@ -10,6 +10,11 @@ import { extendTailwindMerge } from 'tailwind-merge';
 const COLORS = [
   'canvas', 'lift', 'stroke', 'graphite', 'granite',
   'stone', 'bone', 'chalk', 'orange', 'green',
+  // The shadcn aliases from the `@theme inline` block.
+  'background', 'foreground', 'card', 'card-foreground',
+  'popover', 'popover-foreground', 'primary', 'primary-foreground',
+  'secondary', 'secondary-foreground', 'muted', 'muted-foreground',
+  'accent', 'accent-foreground', 'border', 'input', 'ring',
 ];
 
 const FONT_SIZES = ['sm', 'base', 'metric', 'heading', 'display'];

@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
+/* Tailwind reads every file for class names. Keep it out of the token
+   list in cn.ts and the root docs, where bare words such as `ring` or
+   `rounded-md` would be emitted as utilities nothing uses. */
+@source not "../lib/cn.ts";
+@source not "../../*.md";
+
 /* Inside a LightCard the page inverts: bone surface, canvas ink. Tags
    and text links pick that up through this variant instead of a prop. */
 @custom-variant on-light (&:where([data-surface="light"] *));
+
+/* The site is dark only. shadcn components carry `dark:` classes; pin the
+   variant on so they do not follow the visitor's OS setting. */
+@custom-variant dark (&:where(html, html *));
 
 /* ─────────────────────────────────────────────────────────────
    Design tokens — the "Console" design. This block is the only
@@ -102,6 +112,38 @@
       opacity: 0;
     }
   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   shadcn names. Aliases only: every value points at a Console
+   token above, so that block stays the single source of values.
+   `destructive`, `chart-*` and `sidebar-*` are left out on purpose
+   — the palette has no red, and orange never fills a surface.
+   Keep the colour names in step with src/lib/cn.ts.
+   ───────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-bone);
+  --color-card: var(--color-canvas);
+  --color-card-foreground: var(--color-bone);
+  --color-popover: var(--color-lift);
+  --color-popover-foreground: var(--color-bone);
+  --color-primary: var(--color-chalk);
+  --color-primary-foreground: var(--color-canvas);
+  --color-secondary: var(--color-lift);
+  --color-secondary-foreground: var(--color-bone);
+  --color-muted: var(--color-lift);
+  --color-muted-foreground: var(--color-granite);
+  --color-accent: var(--color-lift);
+  --color-accent-foreground: var(--color-chalk);
+  --color-border: var(--color-stroke);
+  --color-input: var(--color-stroke);
+  --color-ring: var(--color-chalk);
+
+  --radius-sm: var(--radius-control);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-panel);
+  --radius-xl: var(--radius-panel);
 }
 
 @layer base {

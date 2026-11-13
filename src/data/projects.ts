@@ -1,3 +1,7 @@
+import agenda from '../assets/agenlink/agenda.png';
+import dashboard from '../assets/agenlink/dashboard.png';
+import shareLink from '../assets/agenlink/share-link.png';
+
 export type Project = {
   slug: string;
   name: string;
@@ -10,8 +14,8 @@ export type Project = {
   built: string;
   myPart: string;
   stack: string[];
-  /** Screenshots, 9:16. Filenames resolve against src/assets/. */
-  shots: { src: string; alt: string }[];
+  /** Phone screenshots at the device's own ratio, imported from src/assets/. */
+  shots: { src: ImageMetadata; alt: string }[];
 };
 
 export const projects: Project[] = [
@@ -30,6 +34,19 @@ export const projects: Project[] = [
     myPart:
       'Co-founder and engineer. Architecture, API, app, deploys, and the boring decisions in between.',
     stack: ['TypeScript', 'React', 'React Native', 'Node.js', 'PostgreSQL', 'Google Calendar API', 'AWS'],
-    shots: [],
+    shots: [
+      {
+        src: dashboard,
+        alt: "AgenLink dashboard with a pending booking request, the week's counts, the public booking link and the next appointment.",
+      },
+      {
+        src: shareLink,
+        alt: 'Share sheet showing the QR code and address of a public booking page.',
+      },
+      {
+        src: agenda,
+        alt: 'Agenda day view with one confirmed appointment and a blocked afternoon.',
+      },
+    ],
   },
 ];

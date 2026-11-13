@@ -8,7 +8,7 @@ import TagList from '../ui/TagList.astro';
 import TextLink from '../ui/TextLink.astro';
 import { projects } from '../../data/projects';
 
-// Three 9:16 slots, each dropped a little further than the last.
+// Three phone-screen slots (1206:2622), each dropped a little further than the last.
 const slotOffsets = ['', 'mt-8', 'mt-16'];
 const row = 'grid grid-cols-1 gap-2 wide:grid-cols-[96px_minmax(0,1fr)] wide:gap-6';
 ---
@@ -79,14 +79,16 @@ const row = 'grid grid-cols-1 gap-2 wide:grid-cols-[96px_minmax(0,1fr)] wide:gap
               return (
                 <div
                   aria-hidden={shot ? undefined : 'true'}
-                  class={`relative aspect-[9/16] overflow-hidden rounded-panel bg-canvas ${offset}`}
+                  class={`relative aspect-[201/437] overflow-hidden rounded-panel ${
+                    shot ? 'border border-stone' : 'bg-canvas'
+                  } ${offset}`}
                 >
                   {shot && (
                     <Image
                       src={shot.src}
                       alt={shot.alt}
-                      width={540}
-                      height={960}
+                      widths={[180, 270, 360, 480, 720]}
+                      sizes="(min-width: 901px) 150px, calc((100vw - 120px) / 3)"
                       loading="lazy"
                       class="size-full object-cover"
                     />
