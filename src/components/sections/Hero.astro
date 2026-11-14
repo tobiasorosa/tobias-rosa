@@ -4,16 +4,17 @@ import GhostLink from '../ui/GhostLink.astro';
 import SlideUpText from '../ui/SlideUpText.astro';
 import StatusDot from '../ui/StatusDot.astro';
 import TextLink from '../ui/TextLink.astro';
+import AnimatedGradient from '../ui/AnimatedGradient.astro';
 import ProfilePanel from './ProfilePanel.astro';
 import { site } from '../../data/site';
 ---
 
-<header
-  id="top"
-  class="mx-auto max-w-page px-gutter pt-[clamp(56px,8vw,120px)] pb-[clamp(56px,7vw,96px)]"
->
+<header id="top" class="relative isolate">
+  <AnimatedGradient />
+
   <div
-    class="grid grid-cols-1 items-start gap-[clamp(40px,5vw,80px)]
+    class="mx-auto grid max-w-page grid-cols-1 items-start gap-[clamp(40px,5vw,80px)] px-gutter
+           pt-[clamp(56px,8vw,120px)] pb-[clamp(56px,7vw,96px)]
            wide:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
   >
     <div class="min-w-0">
@@ -41,13 +42,14 @@ import { site } from '../../data/site';
           class="text-bone">{site.sideProject.name}</TextLink
         >, a scheduling app shipping on both stores.
       </p>
-      <p class="mb-10 max-w-[58ch] animate-enter text-pretty text-granite" style="--enter-delay:410ms">
+      <!-- Stone, not granite: this sits on the gradient, where granite fails 4.5:1. -->
+      <p class="mb-10 max-w-[58ch] animate-enter text-pretty text-stone" style="--enter-delay:410ms">
         I like the unglamorous parts: clean architecture that survives the second year, queries that
         stop being slow, production bugs that turn out to be three services deep.
       </p>
 
       <div class="flex animate-enter flex-wrap gap-4" style="--enter-delay:470ms">
-        <Button href="#work" variant="dark">See the work</Button>
+        <Button href="#work" variant="flow">See the work</Button>
         <GhostLink href={site.resume} download>
           Download résumé <span aria-hidden="true">↓</span>
         </GhostLink>

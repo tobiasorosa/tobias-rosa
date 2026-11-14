@@ -13,7 +13,6 @@ export const site = {
   lang: "en",
   location: "Brazil · remote",
   countryCode: "BR",
-  pronouns: "He/him",
   languages: "EN · PT-BR",
   email: "tobias.rosa2000@gmail.com",
   whatsapp: { label: "+55 12 99222-1131", href: "https://wa.me/5512992221131" },
@@ -34,8 +33,8 @@ export const site = {
     },
     {
       label: "Instagram",
-      short: "instagram.com/tubia_rosa",
-      href: "https://www.instagram.com/tubia_rosa/",
+      short: "instagram.com/tobias_rosa23",
+      href: "https://www.instagram.com/tobias_rosa23/",
     },
   ],
   nav: [

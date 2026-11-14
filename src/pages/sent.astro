@@ -1,0 +1,21 @@
+---
+/** Where the contact form lands when it is posted without JavaScript. */
+import Base from '../layouts/Base.astro';
+import Button from '../components/ui/Button.astro';
+import MonoLabel from '../components/ui/MonoLabel.astro';
+import StatusDot from '../components/ui/StatusDot.astro';
+import { site } from '../data/site';
+---
+
+<Base title={`Message sent — ${site.name}`} noindex>
+  <main id="main" class="mx-auto flex min-h-screen max-w-page flex-col justify-center px-gutter py-24">
+    <MonoLabel class="flex items-center gap-2 text-stone"><StatusDot />Contact</MonoLabel>
+    <h1 class="mt-8 text-display text-bone">Message sent.</h1>
+    <p class="mt-8 max-w-[58ch] text-stone">
+      Thanks for writing. I'll reply within a couple of days.
+    </p>
+    <div class="mt-10 flex flex-wrap gap-4">
+      <Button href="/" variant="dark">Back to the start</Button>
+    </div>
+  </main>
+</Base>

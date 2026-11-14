@@ -32,7 +32,8 @@ Rules that keep the page at its current 0 KB initial JS and 100 Lighthouse:
 - **`frameloop="demand"`** plus an IntersectionObserver pause, so a scrolled-past
   canvas costs nothing.
 - The design system bans looping ambient animation, parallax and scroll-jacking.
-  A 3D piece here should be a deliberate, interaction-driven object — not a
+  The hero's `AnimatedGradient` backdrop is the single exception. A 3D piece
+  here should be a deliberate, interaction-driven object — not a second
   background.
 
 SEO is unaffected either way: every word on the page is server-rendered HTML and

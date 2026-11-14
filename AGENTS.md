@@ -1,12 +1,13 @@
 # Tobias Rosa — portfolio
 
-Astro 7, static output, React installed but unused on `/`. Deploys to Vercel.
+Astro 7, static output with the Vercel adapter for one on-demand route
+(`/api/contact`). React installed but unused on `/`. Deploys to Vercel.
 
 ## Commands
 
 ```
 npm run dev        # dev server
-npm run build      # static build to dist/
+npm run build      # build to .vercel/output (static pages + one function)
 npm run preview    # serve dist/
 npm run og         # regenerate public/og.png
 ```
@@ -18,8 +19,8 @@ npm run og         # regenerate public/og.png
   cannot drift from the visible copy. Edit content here, not in markup.
 - `src/components/ui/` — the primitives of the "Console" design: `Button`,
   `GhostLink`, `TextLink`, `Tag`, `TagList`, `StatusDot`, `MonoLabel`,
-  `SectionHeader`, `LightCard`, `Field`, `Input`, `Textarea`, `SlideUpText`.
-  Variant-heavy ones use `cva`.
+  `SectionHeader`, `LightCard`, `Field`, `Input`, `Textarea`, `SlideUpText`,
+  `AnimatedGradient`. Variant-heavy ones use `cva`.
 - `src/components/sections/` — page sections, composed from `ui/`.
 - `src/components/react/` — shadcn and Spell UI components, which are React.
   The shadcn CLI writes to `react/ui/`. Empty until the first one is added.
@@ -35,18 +36,36 @@ npm run og         # regenerate public/og.png
   They are fetched from Google Fonts at build time and self-hosted;
   `Base.astro` emits the `@font-face` rules and preloads through `<Font>`.
 - `src/pages/index.astro` — composition plus the scroll-spy and contact-form
-  script. `SlideUpText` carries its own small script.
+  script. `SlideUpText` and `AnimatedGradient` carry their own small scripts.
+- `src/pages/api/contact.ts` — the contact form's endpoint and the only page
+  with `prerender = false`. Sends plain text through Resend's REST API (no
+  SDK) with the visitor as Reply-To. A `company` honeypot field short-circuits
+  to a fake success. JSON for the enhanced form (`Accept: application/json`),
+  a 303 to `src/pages/sent.astro` for a no-JS post. Env (`astro:env`, see
+  `.env.example`): `RESEND_API_KEY`, and `CONTACT_TO` / `CONTACT_FROM` with
+  defaults. Until a domain is verified in Resend the sender stays
+  `onboarding@resend.dev` and the recipient must be the Resend account's own
+  address.
 
 ## Rules
 
 - **`/` ships zero external JavaScript.** The enhancement scripts are inlined.
   React is installed only for islands: the future 3D one
   (`src/components/three/`) and shadcn components (`src/components/react/`).
-  Do not add `client:*` directives to anything above the fold.
+  Do not add `client:*` directives to anything above the fold. Astro only
+  inlines a script under Vite's 4 KB limit and `AnimatedGradient`'s sits just
+  below it, so after touching it check that
+  `.vercel/output/static/index.html` has no `<script src>`.
 - **Everything renders in its final state.** The hero entrance and the contact
   form are progressive enhancement — with JS off or
   `prefers-reduced-motion: reduce`, the finished design still shows. The hero
   is the only entrance; nothing animates on scroll.
+- **The hero backdrop is the one ambient loop.** `AnimatedGradient` is a
+  vanilla port of Spell UI's WebGL2 `animated-gradient`. It rests on a static
+  CSS gradient, starts when the headline's `slideup:complete` fires, pauses
+  off screen, and draws a single frame under reduced motion or Save-Data. Its
+  colours are canvas, lift and an ember (orange mixed 35% into canvas) read
+  from the tokens at runtime.
 - **Colour names**: `text-sm`, `text-base`, `text-metric`, `text-heading` and
   `text-display` are font sizes; `text-bone`, `text-stone`, `text-granite` and
   the rest of the palette are colours. `src/lib/cn.ts` teaches tailwind-merge
@@ -56,7 +75,8 @@ npm run og         # regenerate public/og.png
   the experience role titles. No shadows, glows, blur or `backdrop-filter`.
   Line height never above 1.5. Orange and green never fill a button, card or
   large text — only the 6px status dots, the "Open to work" label and the
-  headline cursor. The only bright surfaces are the two `LightCard`s.
+  headline cursor. The hero backdrop's ember is the one exception, and it is
+  never full orange. The only bright surfaces are the two `LightCard`s.
 - **shadcn and Spell UI**: add with `npx shadcn@latest add <name>` or
   `add @spell/<name>`. Never run `shadcn init` — it rewrites `global.css`.
   These components need a `client:*` island, so the rules above still apply:
@@ -66,11 +86,16 @@ npm run og         # regenerate public/og.png
   to Console tokens; they compile to nothing here. The shadcn colour names
   are aliases — a new one goes in `@theme inline` and in `src/lib/cn.ts`.
   `destructive` is unmapped on purpose.
+- **Flow button**: `Button`'s `flow` variant is a CSS-only port of Spell UI's
+  `flow-button`, used on the hero's "See the work". Its dash loop runs only
+  while the button is hovered or focused.
 - **Light cards**: `LightCard` sets `data-surface="light"`. `Tag` and
   `TextLink` adapt through the `on-light:` variant; `Button` and `GhostLink`
   take an explicit `ink` variant. Focus rings turn canvas-coloured inside.
 - Contrast: small text must clear 4.5:1. On canvas the dimmest text colour
-  allowed is `granite`; on a light card it is `graphite`. `graphite` on canvas
+  allowed is `granite`; on a light card it is `graphite`; over the hero
+  backdrop it is `stone` (granite on ember is 3:1), which is why the profile
+  panel has its own `bg-canvas`. `graphite` on canvas
   is for `aria-hidden` glyphs only (bullet dashes, the eyebrow slash).
 - Voice: no emoji, no exclamation marks, sentence case, numbers only if true.
 

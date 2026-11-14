@@ -34,21 +34,42 @@ const rows: ContactRow[] = [
           or Portuguese.
         </p>
 
-        <!-- The native action is the no-JS fallback; the script upgrades it
-             to a pre-composed mailto: with a readable body. -->
+        <!-- Posts to /api/contact, which sends through Resend. Without JS the
+             browser follows the redirect to /sent; the script in index.astro
+             submits with fetch and reports in the note instead. -->
         <form
           data-contact
-          action={`mailto:${site.email}`}
+          action="/api/contact"
           method="post"
-          enctype="text/plain"
           class="grid max-w-[620px] gap-6"
         >
+          <!-- Honeypot: hidden from people and assistive tech, filled by bots. -->
+          <div class="sr-only" aria-hidden="true">
+            <label for="c-company">Company</label>
+            <input id="c-company" name="company" type="text" tabindex="-1" autocomplete="off" />
+          </div>
           <div class="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-6">
             <Field label="Name" for="c-name">
-              <Input id="c-name" name="name" type="text" placeholder="Your name" required />
+              <Input
+                id="c-name"
+                name="name"
+                type="text"
+                autocomplete="name"
+                maxlength={100}
+                placeholder="Your name"
+                required
+              />
             </Field>
             <Field label="Email" for="c-email">
-              <Input id="c-email" name="email" type="email" placeholder="you@company.com" required />
+              <Input
+                id="c-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                maxlength={200}
+                placeholder="you@company.com"
+                required
+              />
             </Field>
           </div>
           <Field label="Message" for="c-msg">
@@ -56,13 +77,16 @@ const rows: ContactRow[] = [
               id="c-msg"
               name="message"
               rows="5"
+              maxlength={5000}
               placeholder="The role, the product, the problem."
               required
             />
           </Field>
           <div class="flex flex-wrap items-center gap-6">
             <Button type="submit" variant="ink">Send message</Button>
-            <MonoLabel data-contact-note class="text-graphite">Opens your mail app.</MonoLabel>
+            <MonoLabel data-contact-note data-email={site.email} role="status" class="text-graphite">
+              Goes straight to my inbox.
+            </MonoLabel>
           </div>
         </form>
       </div>

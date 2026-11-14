@@ -1,0 +1,226 @@
+---
+/**
+ * AnimatedGradient — the hero backdrop. A port of spell-ui's
+ * `animated-gradient` (the WebGL2 swirl shader, "Checks" shape) that
+ * ships no React: one canvas and one small inline script.
+ *
+ * Where it differs from the original:
+ * - No presets and no config prop. The three colours come from the
+ *   Console tokens: canvas, lift, and an ember made by mixing orange
+ *   into canvas. Full orange never reaches the surface.
+ * - The layer rests on a static CSS gradient in the same colours, so
+ *   the hero is finished without JavaScript or WebGL2.
+ * - It starts once the headline's `slideup:complete` fires, so it never
+ *   competes with the hero entrance or the first paint.
+ * - With reduced motion or Save-Data it draws one frame and stops. The
+ *   loop also stops while the hero is off screen.
+ *
+ * The parent must be `relative isolate`. Ember is the brightest pixel
+ * this can produce, so the dimmest text allowed on top is `stone`.
+ */
+import { cn } from '../../lib/cn';
+
+type Props = { class?: string };
+const { class: className } = Astro.props;
+
+/** Percent of orange mixed into canvas to make the ember. */
+const MIX = 35;
+---
+
+<div
+  aria-hidden="true"
+  data-gradient
+  data-mix={MIX}
+  class={cn('backdrop pointer-events-none absolute inset-0 -z-10 overflow-hidden', className)}
+  style={`--ember:color-mix(in srgb, var(--color-orange) ${MIX}%, var(--color-canvas))`}
+>
+  <canvas class="block size-full opacity-0 transition-opacity duration-700"></canvas>
+</div>
+
+<style>
+  .backdrop {
+    background:
+      radial-gradient(55% 75% at 88% 8%, var(--ember), transparent 72%),
+      radial-gradient(45% 60% at 8% 96%, var(--color-lift), transparent 70%), var(--color-canvas);
+    /* Dissolve into the next section instead of ending on a line. */
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 160px), transparent);
+  }
+</style>
+
+<script>
+  // Spell's presets use the same units: percentages, and a speed of 20-40.
+  const P = {
+    proportion: 63,
+    scale: 0.75,
+    speed: 8,
+    distortion: 5,
+    swirl: 61,
+    swirlIterations: 5,
+    softness: 100,
+    offset: -168,
+    shapeSize: 28,
+  };
+  // The field is soft, so half resolution is indistinguishable and a
+  // quarter of the fill cost.
+  const RES = 0.5;
+  // The parameters are compiled into the shader; GLSL wants a decimal point.
+  const f = (n: number) => n.toFixed(4);
+
+  const VERT = `#version 300 es
+in vec4 a_position;
+void main() { gl_Position = a_position; }`;
+
+  const FRAG = `#version 300 es
+precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec3 u_color1;
+uniform vec3 u_color2;
+uniform vec3 u_color3;
+out vec4 fragColor;
+
+const float SCALE = ${f(P.scale)};
+const float PROPORTION = ${f(P.proportion / 100)};
+const float EDGES = ${f(1 - P.softness / 100)};
+const float SHAPE = ${f(P.shapeSize / 100)};
+const float DISTORTION = ${f(P.distortion / 50)};
+const float SWIRL = ${f(P.swirl / 100)};
+
+float random(vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+float noise(vec2 st) {
+  vec2 i = floor(st);
+  vec2 f = fract(st);
+  float a = random(i);
+  float b = random(i + vec2(1., 0.));
+  float c = random(i + vec2(0., 1.));
+  float d = random(i + vec2(1., 1.));
+  vec2 u = f * f * (3. - 2. * f);
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_resolution.xy;
+  float t = .5 * u_time;
+  uv -= .5;
+  uv *= (.0005 + .006 * SCALE) * u_resolution / ${f(RES)};
+  uv += .5;
+
+  float n1 = noise(uv + t);
+  float n2 = noise(uv * 2. - t);
+  float angle = n1 * 6.28318530718;
+  uv.x += 4. * DISTORTION * n2 * cos(angle);
+  uv.y += 4. * DISTORTION * n2 * sin(angle);
+
+  for (float i = 1.; i <= ${f(P.swirlIterations)}; i++) {
+    uv.x += SWIRL / i * cos(t + i * 1.5 * uv.y);
+    uv.y += SWIRL / i * cos(t + i * uv.x);
+  }
+
+  vec2 s = uv * (.5 + 3.5 * SHAPE);
+  float shape = .5 + .5 * sin(s.x) * cos(s.y);
+  float mixer = shape + .48 * sign(PROPORTION - .5) * pow(abs(PROPORTION - .5), .5);
+
+  float blur = .01 + .01 * SCALE;
+  float r1 = smoothstep(.35 * EDGES, .7 - .35 * EDGES + .5 * blur, mixer);
+  float r2 = smoothstep(.3 + .35 * EDGES, 1. - .35 * EDGES + blur, mixer);
+  fragColor = vec4(mix(mix(u_color1, u_color2, r1), u_color3, r2), 1.);
+}`;
+
+  const still =
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+    Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
+
+  const idle = (run: () => void) => {
+    if ('requestIdleCallback' in window) requestIdleCallback(run);
+    else setTimeout(run, 200);
+  };
+
+  const paint = (root: HTMLElement, canvas: HTMLCanvasElement, gl: WebGL2RenderingContext) => {
+    const program = gl.createProgram();
+    for (const [type, source] of [
+      [gl.VERTEX_SHADER, VERT],
+      [gl.FRAGMENT_SHADER, FRAG],
+    ] as const) {
+      const shader = gl.createShader(type)!;
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      gl.attachShader(program, shader);
+    }
+    gl.linkProgram(program);
+    // The CSS gradient underneath stays as the backdrop.
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+    gl.useProgram(program);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+      gl.STATIC_DRAW,
+    );
+    const position = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    // Colours come from the design tokens, never from this file.
+    const tokens = getComputedStyle(document.documentElement);
+    const rgb = (name: string) => {
+      const hex = tokens.getPropertyValue(name).trim().slice(1);
+      const full = hex.length === 3 ? hex.replace(/./g, '$&$&') : hex;
+      return [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16) / 255);
+    };
+    const canvasColor = rgb('--color-canvas');
+    const orange = rgb('--color-orange');
+    const mix = Number(root.dataset.mix) / 100;
+    const ember = canvasColor.map((c, i) => c + (orange[i] - c) * mix);
+
+    const u = (name: string) => gl.getUniformLocation(program, name);
+    gl.uniform3fv(u('u_color1'), ember);
+    gl.uniform3fv(u('u_color2'), rgb('--color-lift'));
+    gl.uniform3fv(u('u_color3'), canvasColor);
+    const time = u('u_time');
+    const resolution = u('u_resolution');
+
+    const began = performance.now();
+    let frame = 0;
+    const draw = () => {
+      const elapsed = still ? 0 : (performance.now() - began) / 1000;
+      gl.uniform1f(time, elapsed * (P.speed / 100) * 5 + P.offset * 0.01);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    };
+    const loop = () => {
+      draw();
+      frame = requestAnimationFrame(loop);
+    };
+
+    // Fires once on observe, which is also the first paint.
+    new ResizeObserver(() => {
+      canvas.width = Math.max(1, Math.round(root.clientWidth * RES));
+      canvas.height = Math.max(1, Math.round(root.clientHeight * RES));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.uniform2f(resolution, canvas.width, canvas.height);
+      draw();
+      canvas.classList.replace('opacity-0', 'opacity-100');
+    }).observe(root);
+
+    if (still) return;
+    new IntersectionObserver(([entry]) => {
+      cancelAnimationFrame(frame);
+      if (entry.isIntersecting) frame = requestAnimationFrame(loop);
+    }).observe(root);
+  };
+
+  // Creating the context and compiling the shader each block for about a
+  // frame. They run as two idle tasks, so neither is a long task, and
+  // only once the headline has landed (SlideUpText says when). The
+  // backdrop is the entrance's last beat.
+  const start = () =>
+    idle(() => {
+      const root = document.querySelector<HTMLElement>('[data-gradient]');
+      const canvas = root?.querySelector('canvas');
+      const gl = canvas?.getContext('webgl2', { antialias: false });
+      if (root && canvas && gl) idle(() => paint(root, canvas, gl));
+    });
+  if (still) addEventListener('load', start);
+  else document.addEventListener('slideup:complete', start, { once: true });
+</script>

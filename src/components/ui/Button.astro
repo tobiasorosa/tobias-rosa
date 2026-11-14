@@ -2,6 +2,11 @@
 /**
  * Button — neutral fills only. Renders an <a> when `href` is set,
  * a <button> otherwise.
+ *
+ * `flow` is a CSS-only port of spell-ui's `flow-button`: on hover or
+ * keyboard focus the fill clears and a dashed border grows out to the
+ * edge with its dashes marching. The original measures the button in
+ * React to build an SVG path; a <rect> sized in percent needs neither.
  */
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
@@ -15,6 +20,10 @@ const button = cva(
       variant: {
         // #1f1d1c sits between canvas and lift; this button is its only use.
         dark: 'bg-[#1f1d1c] text-bone hover:bg-stroke hover:text-chalk',
+        // Rests exactly like `dark`.
+        flow:
+          'group relative bg-[#1f1d1c] text-bone hover:bg-transparent hover:text-chalk ' +
+          'focus-visible:bg-transparent focus-visible:text-chalk',
         light: 'bg-chalk text-canvas hover:bg-bone',
         // For light cards.
         ink: 'bg-canvas text-bone hover:bg-lift hover:text-chalk',
@@ -38,5 +47,29 @@ const extra = href ? { href } : { type };
 ---
 
 <Tag class={cn(button({ variant, size }), className)} {...extra} {...rest}>
+  {
+    variant === 'flow' && (
+      // The span is the positioned box: an absolutely positioned <svg>
+      // would keep its intrinsic size. Half a pixel in, so the 1px stroke
+      // sits on the pixel grid with its outer edge on the button's edge.
+      <span
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-[2.5px] opacity-0 transition-[inset,opacity]
+               group-hover:inset-[0.5px] group-hover:opacity-100
+               group-focus-visible:inset-[0.5px] group-focus-visible:opacity-100"
+      >
+        <svg class="block size-full overflow-visible">
+          <rect
+            width="100%"
+            height="100%"
+            rx="2.5"
+            fill="none"
+            stroke-dasharray="6 4"
+            class="stroke-chalk group-hover:animate-flow group-focus-visible:animate-flow"
+          />
+        </svg>
+      </span>
+    )
+  }
   <slot />
 </Tag>
