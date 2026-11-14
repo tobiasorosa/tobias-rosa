@@ -1,8 +1,9 @@
 // @ts-check
-import { defineConfig, fontProviders } from 'astro/config';
+import { defineConfig, envField, fontProviders } from 'astro/config';
 
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import vercel from '@astrojs/vercel';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
@@ -11,15 +12,37 @@ export default defineConfig({
   // TODO: swap for the real domain before launch.
   site: 'https://tobiasrosa.dev',
 
-  // Static output. The contact form is a mailto: handoff, so nothing
-  // on this site needs a server — no adapter, no SSR.
+  // Static output. Every page is prerendered; the one exception is
+  // `/api/contact` (`prerender = false`), which the Vercel adapter turns
+  // into a function that sends the contact form through Resend.
   output: 'static',
+  adapter: vercel(),
+
+  // Read by `/api/contact` at runtime. None are needed to build.
+  env: {
+    schema: {
+      RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // While no domain is verified in Resend, the sender must be
+      // onboarding@resend.dev and the recipient the Resend account's address.
+      CONTACT_TO: envField.string({
+        context: 'server',
+        access: 'secret',
+        default: 'tobias.rosa2000@gmail.com',
+      }),
+      CONTACT_FROM: envField.string({
+        context: 'server',
+        access: 'secret',
+        default: 'Portfolio <onboarding@resend.dev>',
+      }),
+    },
+  },
 
   integrations: [
     // Kept installed for the future three.js island; nothing on `/`
     // is a React island today, so the React runtime never ships.
     react(),
-    sitemap(),
+    // /sent is the no-JS landing after the contact form posts.
+    sitemap({ filter: (page) => !page.endsWith('/sent/') && !page.endsWith('/sent') }),
   ],
 
   // Geist and Geist Mono come from Google Fonts at build time and are

@@ -15,10 +15,11 @@ const facts = [
 ---
 
 <aside class="min-w-0 animate-enter" style="--enter-delay:80ms">
-  <div class="overflow-hidden rounded-panel border border-stroke">
+  <!-- Opaque, so the granite labels inside never sit on the hero gradient. -->
+  <div class="overflow-hidden rounded-panel border border-stroke bg-canvas">
     <div class="flex h-[41px] items-center justify-between gap-4 border-b border-stroke bg-lift px-5">
       <MonoLabel class="flex items-center gap-2 text-bone"><StatusDot />Profile</MonoLabel>
-      <MonoLabel class="text-stone">{site.pronouns} · {site.languages}</MonoLabel>
+      <MonoLabel class="text-stone">{site.languages}</MonoLabel>
     </div>
 
     <div class="flex items-center gap-4 border-b border-stroke p-5">
@@ -65,7 +66,7 @@ const facts = [
       <div class="flex items-center justify-between gap-4 py-4">
         <dt class="label-mono text-granite">Status</dt>
         <dd class="label-mono flex items-center gap-2 text-green">
-          <StatusDot variant="green" />Open to work
+          <StatusDot variant="green" />Open for new opportunities
         </dd>
       </div>
     </dl>

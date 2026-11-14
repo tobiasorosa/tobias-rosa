@@ -28,43 +28,89 @@ import Footer from '../components/sections/Footer.astro';
    * the contact form.
    */
 
-  // Nav scroll-spy.
+  // Nav scroll-spy. The active section is the last one whose top has gone
+  // under the sticky nav. At the end of the page it is the last section,
+  // which on a tall viewport never gets that far up.
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]')];
   const sections = links
     .map((a) => document.querySelector(a.getAttribute('href')!))
     .filter((s): s is Element => Boolean(s));
+  const nav = document.querySelector('nav');
 
-  if (sections.length && 'IntersectionObserver' in window) {
-    const spy = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (!e.isIntersecting) continue;
-          for (const a of links) {
-            const active = a.getAttribute('href') === `#${e.target.id}`;
-            if (active) a.setAttribute('aria-current', 'true');
-            else a.removeAttribute('aria-current');
-          }
-        }
+  if (sections.length && nav) {
+    const mark = (id?: string) => {
+      for (const a of links) {
+        if (a.getAttribute('href') === `#${id}`) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      }
+    };
+
+    const spy = () => {
+      const line = nav.getBoundingClientRect().bottom;
+      const atEnd =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 1;
+      const current = atEnd
+        ? sections.at(-1)
+        : sections.findLast((s) => s.getBoundingClientRect().top <= line);
+      mark(current?.id);
+    };
+
+    // A clicked link stays active while the scroll it started is running,
+    // even if the page runs out before its section reaches the nav.
+    let held = 0;
+    const hold = () => {
+      clearTimeout(held);
+      held = window.setTimeout(() => (held = 0), 150);
+    };
+    for (const a of links) {
+      a.addEventListener('click', () => {
+        mark(a.hash.slice(1));
+        hold();
+      });
+    }
+
+    let queued = false;
+    addEventListener(
+      'scroll',
+      () => {
+        if (held) return hold();
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          if (!held) spy();
+        });
       },
-      { rootMargin: '-45% 0px -50% 0px' },
+      { passive: true },
     );
-    sections.forEach((s) => spy.observe(s));
+    spy();
   }
 
-  // Contact form: compose a readable mailto: instead of the raw
-  // enctype="text/plain" body the native form action would send.
+  // Contact form: submit with fetch and report in the note, instead of the
+  // native post's redirect to /sent. On any failure, point at the address.
   const form = document.querySelector<HTMLFormElement>('[data-contact]');
-  form?.addEventListener('submit', (ev) => {
+  const note = document.querySelector<HTMLElement>('[data-contact-note]');
+  form?.addEventListener('submit', async (ev) => {
     ev.preventDefault();
-    const d = new FormData(form);
-    const name = String(d.get('name') ?? '').trim();
-    const email = String(d.get('email') ?? '').trim();
-    const msg = String(d.get('message') ?? '').trim();
-    const note = document.querySelector<HTMLElement>('[data-contact-note]');
-    if (note) note.textContent = 'Opening your mail app…';
-    const to = form.action.replace(/^mailto:/, '');
-    const subject = encodeURIComponent(`Portfolio — ${name || 'hello'}`);
-    const body = encodeURIComponent(`${msg}\n\n— ${name} (${email})`);
-    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    const button = form.querySelector<HTMLButtonElement>('[type="submit"]');
+    const say = (text: string) => note && (note.textContent = text);
+    if (button) button.disabled = true;
+    form.setAttribute('aria-busy', 'true');
+    say('Sending…');
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      form.reset();
+      say("Sent. I'll reply within a couple of days.");
+    } catch {
+      say(`Couldn't send. Email me at ${note?.dataset.email} instead.`);
+    } finally {
+      if (button) button.disabled = false;
+      form.removeAttribute('aria-busy');
+    }
   });
 </script>
